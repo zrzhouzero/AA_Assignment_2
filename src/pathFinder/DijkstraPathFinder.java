@@ -3,7 +3,6 @@ package pathFinder;
 import map.Coordinate;
 import map.PathMap;
 
-import java.nio.file.Path;
 import java.util.*;
 
 public class DijkstraPathFinder implements PathFinder {
