@@ -37,10 +37,13 @@ public class DijkstraPathFinder implements PathFinder {
         }
 
         int minimumIndex = findMinimumIndex();
-        System.out.println("Shortest Distance: " + allPossiblePath.get(minimumIndex).getShortestDistance());
 
-        return allPossiblePath.get(minimumIndex).getPath();
-
+        if (allPossiblePath.get(minimumIndex).isFound()) {
+            System.out.println("Shortest Distance: " + allPossiblePath.get(minimumIndex).getShortestDistance());
+            return allPossiblePath.get(minimumIndex).getPath();
+        } else {
+            return new ArrayList<>();
+        }
     } // end of findPath()
 
 
@@ -72,7 +75,12 @@ public class DijkstraPathFinder implements PathFinder {
     public PathRecorder findPathAmong(Coordinate origin, Coordinate destination, List<Coordinate> wayPoints) {
         List<Coordinate> tempWayPoints = new ArrayList<>(wayPoints);
         PathRecorder finalPath = new PathRecorder();
+
         while (tempWayPoints.size() > 0) {
+
+            // find the way point which has the shortest distance away from the start point,
+            // then remove it from the way point list(because it is already inspected),
+            // and select it as the next start point
             ArrayList<PathRecorder> paths = new ArrayList<>();
             for (Coordinate c : tempWayPoints) {
                 paths.add(findPathBetween(origin, c));
@@ -84,6 +92,11 @@ public class DijkstraPathFinder implements PathFinder {
                 }
             }
             finalPath.mergeRecorder(paths.get(minimumIndex));
+
+            // if any of the way points which cannot be reached, it means there is no possible approach
+            if (!paths.get(minimumIndex).isFound()) {
+                return new PathRecorder();
+            }
             origin = paths.get(minimumIndex).getPath().get(paths.get(minimumIndex).getPath().size() - 1);
             tempWayPoints.remove(origin);
         }
@@ -201,8 +214,10 @@ public class DijkstraPathFinder implements PathFinder {
             nodeVisited.add(p.getCurrentCoordinate());
         }
 
+        boolean isFound = (path.contains(origin) && path.contains(destination));
+
         // using a PathRecorder to store the result
-        return new PathRecorder(path, distance, nodeVisited);
+        return new PathRecorder(path, distance, nodeVisited, isFound);
     }
 
 } // end of class DijsktraPathFinder
@@ -285,23 +300,31 @@ class PathRecorder {
     private List<Coordinate> path;
     private Integer shortestDistance;
     private HashSet<Coordinate> nodesVisited;
+    private boolean isFound;
 
     public PathRecorder() {
         this.path = new ArrayList<>();
         this.shortestDistance = 0;
         this.nodesVisited = new HashSet<>();
+        this.isFound = true;
     }
 
-    public PathRecorder(List<Coordinate> path, Integer shortestDistance, HashSet<Coordinate> nodesVisited) {
+    public PathRecorder(List<Coordinate> path, Integer shortestDistance, HashSet<Coordinate> nodesVisited, boolean isFound) {
         this.path = path;
         this.shortestDistance = shortestDistance;
         this.nodesVisited = nodesVisited;
+        this.isFound = isFound;
+    }
+
+    public boolean isFound() {
+        return isFound;
     }
 
     public void mergeRecorder(PathRecorder p) {
         addPath(p.getPath());
         addShortestDistance(p.getShortestDistance());
         addNodesVisited(p.getNodesVisited());
+        this.isFound = this.isFound && p.isFound;
     }
 
     public Integer getShortestDistance() {
