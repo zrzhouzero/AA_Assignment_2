@@ -91,12 +91,13 @@ public class DijkstraPathFinder implements PathFinder {
                     minimumIndex = i;
                 }
             }
-            finalPath.mergeRecorder(paths.get(minimumIndex));
 
             // if any of the way points which cannot be reached, it means there is no possible approach
             if (!paths.get(minimumIndex).isFound()) {
                 return new PathRecorder();
             }
+
+            finalPath.mergeRecorder(paths.get(minimumIndex));
             origin = paths.get(minimumIndex).getPath().get(paths.get(minimumIndex).getPath().size() - 1);
             tempWayPoints.remove(origin);
         }
