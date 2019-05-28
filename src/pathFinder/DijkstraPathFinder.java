@@ -12,7 +12,6 @@ public class DijkstraPathFinder implements PathFinder {
 
     public DijkstraPathFinder(PathMap map) {
         this.map = map;
-        this.allPossiblePath = new ArrayList<>();
     } // end of DijkstraPathFinder()
 
 
@@ -21,27 +20,26 @@ public class DijkstraPathFinder implements PathFinder {
         // when there are no way points, simply call findPathBetween method to improve the performance
         // when there are way points, call findPathAmong to consider all the way points
         // as for more than one origins or destinations, we need to select the minimum one from all the possible paths
+        this.allPossiblePath = new ArrayList<>();
+
         if (this.map.waypointCells.size() == 0) {
             for (Coordinate co : map.originCells) {
                 for (Coordinate cd : map.destCells) {
                     allPossiblePath.add(findPathBetween(co, cd));
                 }
             }
-            int minimumIndex = findMinimumIndex();
-            System.out.println("Shortest Distance: " + allPossiblePath.get(minimumIndex).getShortestDistance());
-
-            return allPossiblePath.get(minimumIndex).getPath();
         } else {
             for (Coordinate co : map.originCells) {
                 for (Coordinate cd : map.destCells) {
                     allPossiblePath.add(findPathAmong(co, cd, map.waypointCells));
                 }
             }
-            int minimumIndex = findMinimumIndex();
-            System.out.println("Shortest Distance: " + allPossiblePath.get(minimumIndex).getShortestDistance());
-
-            return allPossiblePath.get(minimumIndex).getPath();
         }
+
+        int minimumIndex = findMinimumIndex();
+        System.out.println("Shortest Distance: " + allPossiblePath.get(minimumIndex).getShortestDistance());
+
+        return allPossiblePath.get(minimumIndex).getPath();
 
     } // end of findPath()
 
