@@ -6,13 +6,13 @@ import map.PathMap;
 import java.util.*;
 
 public class DijkstraPathFinder implements PathFinder {
+
     private PathMap map;
     private ArrayList<PathRecorder> allPossiblePath;
 
     public DijkstraPathFinder(PathMap map) {
         this.map = map;
     } // end of DijkstraPathFinder()
-
 
     @Override
     public List<Coordinate> findPath() {
@@ -53,6 +53,7 @@ public class DijkstraPathFinder implements PathFinder {
 
     /**
      * find the index of the minimum distance from allPossiblePath
+     *
      * @return this minimum index
      */
     private int findMinimumIndex() {
@@ -66,47 +67,56 @@ public class DijkstraPathFinder implements PathFinder {
     }
 
     /**
-     * @param origin the origin point coordinate
+     * @param origin      the origin point coordinate
      * @param destination the destination point coordinate
-     * @param wayPoints all the way points must be visited
+     * @param wayPoints   all the way points must be visited
      * @return PathRecorder that records the shortest path, the coordinates visited, and the distance of the shortest path
      */
     public PathRecorder findPathAmong(Coordinate origin, Coordinate destination, List<Coordinate> wayPoints) {
-        List<Coordinate> tempWayPoints = new ArrayList<>(wayPoints);
-        PathRecorder finalPath = new PathRecorder();
-
-        while (tempWayPoints.size() > 0) {
-
-            // find the way point which has the shortest distance away from the start point,
-            // then remove it from the way point list(because it is already inspected),
-            // and select it as the next start point
-            ArrayList<PathRecorder> paths = new ArrayList<>();
-            for (Coordinate c : tempWayPoints) {
-                paths.add(findPathBetween(origin, c));
+        // if there is no path between origin and destination
+        if (!findPathBetween(origin, destination).isFound()) return new PathRecorder();
+        // if there is no path between origin and any way points
+        boolean isReachable = true;
+        for (Coordinate c : wayPoints) {
+            if (!findPathBetween(origin, c).isFound()) {
+                isReachable = false;
+                break;
             }
-            int minimumIndex = 0;
-            for (int i = 0; i < paths.size(); i++) {
-                if (paths.get(i).getShortestDistance() < paths.get(minimumIndex).getShortestDistance()) {
-                    minimumIndex = i;
-                }
-            }
-
-            // if any of the way points which cannot be reached, it means there is no possible approach
-            if (!paths.get(minimumIndex).isFound()) {
-                return new PathRecorder();
-            }
-
-            finalPath.mergeRecorder(paths.get(minimumIndex));
-            origin = paths.get(minimumIndex).getPath().get(paths.get(minimumIndex).getPath().size() - 1);
-            tempWayPoints.remove(origin);
         }
-        PathRecorder lastPath = findPathBetween(finalPath.getPath().get(finalPath.getPath().size() - 1), destination);
-        finalPath.mergeRecorder(lastPath);
-        return finalPath;
+        if (!isReachable) return new PathRecorder();
+
+        // get all way points permutations
+        ArrayList<ArrayList<Coordinate>> allPossibleRoute = arrangementGenerator(origin, destination, wayPoints);
+
+        // search for the shortest path among all the routes
+        int shortestDistance = Integer.MAX_VALUE;
+        PathRecorder result = new PathRecorder();
+
+        for (ArrayList<Coordinate> route: allPossibleRoute) {
+            PathRecorder routeRecorder = new PathRecorder();
+            for (int i = 0; i < route.size() - 1; i++) {
+                routeRecorder.mergeRecorder(findPathBetween(route.get(i), route.get(i + 1)));
+            }
+            if (routeRecorder.getShortestDistance() < shortestDistance) {
+                shortestDistance = routeRecorder.getShortestDistance();
+                result = routeRecorder;
+            }
+        }
+        return result;
+    }
+
+    private ArrayList<ArrayList<Coordinate>> arrangementGenerator(Coordinate origin, Coordinate destination, List<Coordinate> wayPoints) {
+        Permutation.permutation(wayPoints, 0, wayPoints.size());
+        ArrayList<ArrayList<Coordinate>> result = Permutation.getResult();
+        for (ArrayList<Coordinate> c : result) {
+            c.add(0, origin);
+            c.add(destination);
+        }
+        return result;
     }
 
     /**
-     * @param origin the origin point coordinate
+     * @param origin      the origin point coordinate
      * @param destination the destination point coordinate
      * @return PathRecorder that records the shortest path, the coordinates visited, and the distance of the shortest path
      */
@@ -231,6 +241,7 @@ public class DijkstraPathFinder implements PathFinder {
  * @author zhouzhirou
  */
 class PathFinderRecorder {
+
     private Coordinate currentCoordinate;
     private Integer shortestDistance;
     private Coordinate previousCoordinate;
@@ -273,6 +284,7 @@ class PathFinderRecorder {
     public int hashCode() {
         return currentCoordinate.hashCode();
     }
+
 }
 
 /**
@@ -292,11 +304,13 @@ class PathFinderRecorderComparator implements Comparator<PathFinderRecorder> {
  * the shortest path,
  * the corresponding distance,
  * and all the coordinate visited.
- *
+ * <p>
  * Two PathRecorders can merge into one.
+ *
  * @author zhouzhirou
  */
 class PathRecorder {
+
     private List<Coordinate> path;
     private Integer shortestDistance;
     private HashSet<Coordinate> nodesVisited;
@@ -357,4 +371,37 @@ class PathRecorder {
             this.path.addAll(path);
         }
     }
+
+}
+
+/**
+ * A class to generate all way points permutations
+ */
+class Permutation {
+
+    private static ArrayList<ArrayList<Coordinate>> result = new ArrayList<>();
+
+    public static void permutation(List<Coordinate> wayPoints, int start, int end) {
+        if (start == end) {
+            ArrayList<Coordinate> coordinates = new ArrayList<>();
+            for (int i = 0; i < end; i++) {
+                coordinates.add(i, wayPoints.get(i));
+            }
+            result.add(coordinates);
+        } else {
+            for (int i = start; i < end; i++) {
+                Coordinate temp = wayPoints.get(start);
+                wayPoints.set(start, wayPoints.get(i));
+                wayPoints.set(i, temp);
+                permutation(wayPoints, start + 1, end);
+                wayPoints.set(i, wayPoints.get(start));
+                wayPoints.set(start, temp);
+            }
+        }
+    }
+
+    public static ArrayList<ArrayList<Coordinate>> getResult() {
+        return result;
+    }
+
 }
