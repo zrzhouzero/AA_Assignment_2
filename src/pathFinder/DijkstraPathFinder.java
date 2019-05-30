@@ -48,7 +48,11 @@ public class DijkstraPathFinder implements PathFinder {
 
     @Override
     public int coordinatesExplored() {
-        return this.allPossiblePath.get(findMinimumIndex()).getNodesVisited().size();
+        HashSet<Coordinate> resultSet = new HashSet<>();
+        for (PathRecorder p : allPossiblePath) {
+            resultSet.addAll(p.getNodesVisited());
+        }
+        return resultSet.size();
     } // end of cellsExplored()
 
     /**
