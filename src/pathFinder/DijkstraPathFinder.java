@@ -72,7 +72,7 @@ public class DijkstraPathFinder implements PathFinder {
      * @param wayPoints   all the way points must be visited
      * @return PathRecorder that records the shortest path, the coordinates visited, and the distance of the shortest path
      */
-    public PathRecorder findPathAmong(Coordinate origin, Coordinate destination, List<Coordinate> wayPoints) {
+    private PathRecorder findPathAmong(Coordinate origin, Coordinate destination, List<Coordinate> wayPoints) {
         // if there is no path between origin and destination
         if (!findPathBetween(origin, destination).isFound()) return new PathRecorder();
         // if there is no path between origin and any way points
@@ -120,7 +120,7 @@ public class DijkstraPathFinder implements PathFinder {
      * @param destination the destination point coordinate
      * @return PathRecorder that records the shortest path, the coordinates visited, and the distance of the shortest path
      */
-    public PathRecorder findPathBetween(Coordinate origin, Coordinate destination) {
+    private PathRecorder findPathBetween(Coordinate origin, Coordinate destination) {
         if (!map.isIn(origin)) {
             return new PathRecorder();
         }
@@ -246,21 +246,21 @@ class PathFinderRecorder {
     private Integer shortestDistance;
     private Coordinate previousCoordinate;
 
-    public PathFinderRecorder(Coordinate currentCoordinate, Integer shortestDistance, Coordinate previousCoordinate) {
+    PathFinderRecorder(Coordinate currentCoordinate, Integer shortestDistance, Coordinate previousCoordinate) {
         this.currentCoordinate = currentCoordinate;
         this.shortestDistance = shortestDistance;
         this.previousCoordinate = previousCoordinate;
     }
 
-    public Coordinate getCurrentCoordinate() {
+    Coordinate getCurrentCoordinate() {
         return currentCoordinate;
     }
 
-    public Coordinate getPreviousCoordinate() {
+    Coordinate getPreviousCoordinate() {
         return previousCoordinate;
     }
 
-    public Integer getShortestDistance() {
+    Integer getShortestDistance() {
         return shortestDistance;
     }
 
@@ -316,40 +316,40 @@ class PathRecorder {
     private HashSet<Coordinate> nodesVisited;
     private boolean isFound;
 
-    public PathRecorder() {
+    PathRecorder() {
         this.path = new ArrayList<>();
         this.shortestDistance = 0;
         this.nodesVisited = new HashSet<>();
         this.isFound = true;
     }
 
-    public PathRecorder(List<Coordinate> path, Integer shortestDistance, HashSet<Coordinate> nodesVisited, boolean isFound) {
+    PathRecorder(List<Coordinate> path, Integer shortestDistance, HashSet<Coordinate> nodesVisited, boolean isFound) {
         this.path = path;
         this.shortestDistance = shortestDistance;
         this.nodesVisited = nodesVisited;
         this.isFound = isFound;
     }
 
-    public boolean isFound() {
+    boolean isFound() {
         return isFound;
     }
 
-    public void mergeRecorder(PathRecorder p) {
+    void mergeRecorder(PathRecorder p) {
         addPath(p.getPath());
         addShortestDistance(p.getShortestDistance());
         addNodesVisited(p.getNodesVisited());
         this.isFound = this.isFound && p.isFound;
     }
 
-    public Integer getShortestDistance() {
+    Integer getShortestDistance() {
         return shortestDistance;
     }
 
-    public HashSet<Coordinate> getNodesVisited() {
+    HashSet<Coordinate> getNodesVisited() {
         return nodesVisited;
     }
 
-    public List<Coordinate> getPath() {
+    List<Coordinate> getPath() {
         return path;
     }
 
@@ -381,7 +381,7 @@ class Permutation {
 
     private static ArrayList<ArrayList<Coordinate>> result = new ArrayList<>();
 
-    public static void permutation(List<Coordinate> wayPoints, int start, int end) {
+    static void permutation(List<Coordinate> wayPoints, int start, int end) {
         if (start == end) {
             ArrayList<Coordinate> coordinates = new ArrayList<>();
             for (int i = 0; i < end; i++) {
@@ -400,7 +400,7 @@ class Permutation {
         }
     }
 
-    public static ArrayList<ArrayList<Coordinate>> getResult() {
+    static ArrayList<ArrayList<Coordinate>> getResult() {
         return result;
     }
 
